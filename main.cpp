@@ -49,7 +49,7 @@ int main ()
 	string weapon = "";
 	int atk_bonus = 0, def_bonus = 0, pow_bonus = 0;
 	
-	cout << "Welcome to Knight\'s Fight!" << endl;
+	cout << "Welcome to Knight Light into Night!" << endl;
 	cout << "Please, enter your name: ";
 	string player;
 	getline (cin, player);
