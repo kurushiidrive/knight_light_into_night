@@ -4,6 +4,13 @@
 #include "Die.h"
 #include "Player.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <cstdlib>
+#include <cstring>
+#endif
+
 class Night;
 
 class Game
@@ -15,7 +22,7 @@ public:
 
 private:
 	Player player;
-	std::vector<Night> night;
+//	std::vector<Night> night;
 	int turn_count;
 	Die d6{ 1, 6 };
 	Die d4{ 1, 4 };
@@ -24,5 +31,4 @@ private:
 	Die d20{ 1, 20 };
 	void PrintOptions();
 	void ClearScreen();
-	void Launch(std::future<void> future_obj);
 };
