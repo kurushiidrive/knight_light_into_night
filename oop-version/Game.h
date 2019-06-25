@@ -1,8 +1,9 @@
 #pragma once
-#include <vector>
+#include <queue>
 #include <future>
 #include "Die.h"
 #include "Player.h"
+#include "Night.h"
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -10,8 +11,6 @@
 #include <cstdlib>
 #include <cstring>
 #endif
-
-class Night;
 
 class Game
 {
@@ -22,13 +21,10 @@ public:
 
 private:
 	Player player;
-//	std::vector<Night> night;
+	std::queue<Night> night;
 	int turn_count;
-	Die d6{ 1, 6 };
-	Die d4{ 1, 4 };
-	Die d8{ 1, 8 };
-	Die d10{ 1, 10 };
-	Die d20{ 1, 20 };
+	Die die;
 	void PrintOptions();
 	void ClearScreen();
+	void GameLoop();
 };
