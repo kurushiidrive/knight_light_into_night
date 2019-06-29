@@ -5,7 +5,7 @@
 #endif
 
 Player::Player() :
-	level{ 1 }
+	level{ 20 }
 {
 	set(level);
 	initialised = true;
@@ -22,6 +22,8 @@ void Player::set(int level, profession p)
 
 	prof = p;
 
+	// for these base weapons below, note that the atk/def/pow bonuses are the same as the professions base bonuses to the base ATK/DEF/POW stats themselves.
+	// exception lies in Ranger's daggers, where the atk/def/pow bonuses are adjusted more than normal to eliminate the base bonuses on the bow.
 	switch (prof)
 	{
 	case WARRIOR:
@@ -42,7 +44,7 @@ void Player::set(int level, profession p)
 		// by bow
 		ATK += (int)std::ceil(3.4 * level);
 		DEF -= (int)std::ceil(2.5 * level);
-		POW += (int)std::ceil(1.8 * level);
+		POW += (int)std::ceil(2.8 * level);
 
 		HP += 2 * die.Reset(1, 8)(level);
 
@@ -50,13 +52,13 @@ void Player::set(int level, profession p)
 		{
 			atk_bonus = (int)std::ceil(3.4 * level);
 			def_bonus = 0;
-			pow_bonus = (int)std::ceil(1.8 * level);
+			pow_bonus = (int)std::ceil(2.8 * level);
 		}
 		else if (weapon.substr(0, weapon.find(' ')) == "daggers") // daggers; crits easily since it's a precision weapon (18-20). Also fatals relatively well (46-50).
 		{
-			atk_bonus = -((int)std::ceil(3.4 * level));
-			def_bonus = (int)std::ceil(4.6 * level);
-			pow_bonus = (int)std::ceil(2.8 * level);
+			atk_bonus = ((int)std::ceil(3.0 * level));
+			def_bonus = (int)std::ceil(3.6 * level);
+			pow_bonus = -((int)std::ceil(2.0 * level));
 		}
 		break;
 	case WIZARD:
@@ -67,6 +69,7 @@ void Player::set(int level, profession p)
 		POW += (int)std::ceil(3.1 * level);
 
 		HP += die.Reset(1, 6)(level);
+		RES += (int)std::ceil(2.0 * level);
 
 		// wizard is the only profession that can self-buff RES without using items.
 		atk_bonus = (int)std::ceil(1.7 * level);
@@ -151,21 +154,19 @@ bool Player::Fatal(int roll)
 
 bool Player::Switch()
 {
-	if (prof == WARRIOR || prof == RANGER)
+	if (prof == WARRIOR || prof == WIZARD)
 		return false;
 
 	if (action_points < 1)
 		return false;
 
-	action_points--;
-
 //	std::size_t index = weapon.find(' ');
 	if (weapon == "bow daggers") 
 	{
 		// make sure proper combat bonuses are applied
-		atk_bonus = 0;
-		def_bonus = (int)std::ceil(2.1 * level);
-		pow_bonus = (int)std::ceil(1.0 * level);
+		atk_bonus = ((int)std::ceil(3.0 * level));
+		def_bonus = (int)std::ceil(3.6 * level);
+		pow_bonus = -((int)std::ceil(2.0 * level));
 
 		BASE_ACTION_POINTS *= 2;
 		action_points = BASE_ACTION_POINTS;
@@ -174,9 +175,10 @@ bool Player::Switch()
 	else if (weapon == "daggers bow")
 	{
 		// make sure proper combat bonuses are applied
-		atk_bonus = (int)std::ceil(2.4 * level);
+		
+		atk_bonus = (int)std::ceil(3.4 * level);
 		def_bonus = 0;
-		pow_bonus = (int)std::ceil(0.8 * level);
+		pow_bonus = (int)std::ceil(2.8 * level);
 
 		BASE_ACTION_POINTS /= 2;
 		action_points = BASE_ACTION_POINTS;
@@ -206,9 +208,24 @@ bool Player::Accel_Guard()
 	return true;
 }
 
+void Player::Set_Accel_Strike(bool t)
+{
+	accel_strike = t;
+}
+
+bool Player::Get_Accel_Strike()
+{
+	return accel_strike;
+}
+
 void Player::Set_Accel_Guard(bool t)
 {
 	accel_guard = t;
+}
+
+bool Player::Get_Accel_Guard()
+{
+	return accel_guard;
 }
 
 std::vector<int> Player::Use_Normal_Ability()
@@ -249,12 +266,12 @@ std::vector<int> Player::Use_Normal_Ability()
 	
 	bool fatal = Fatal(die.Reset(1, 50)());
 	bool ac_str = accel_strike;
-	int recoil;
+	int recoil = 0;
 	if (ac_str)
 	{
 		damage_roll += POW;
 		accel_strike = false;
-		if (prof != RANGER && weapon.substr(0, weapon.find(' ')) != "bow")
+		if (prof != RANGER || (prof == RANGER && weapon.substr(0, weapon.find(' ')) != "bow"))
 		{
 			recoil = (int)std::ceil(0.35 * level + die.Reset(1, 6)(level / 2));
 			HP -= recoil;	// accel strike recoil
@@ -266,7 +283,7 @@ std::vector<int> Player::Use_Normal_Ability()
 	ret.push_back(damage_roll);
 	ret.push_back(fatal);
 	ret.push_back(ac_str);
-	if (ac_str)
+	if (ac_str && recoil != 0)
 		ret.push_back(recoil);
 
 	action_points--;
