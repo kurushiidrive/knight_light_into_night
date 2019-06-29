@@ -21,10 +21,13 @@ public:
 	void Set_Toughness(int);
 
 	void Reset_Action_Points();
+	int Get_Action_Points();
 
 	std::vector<int> Use_Normal_Ability();
 
-	void Reset();
+	void Reset(int);
+
+	int Get_Level();
 
 protected:
 	Die die;
@@ -40,5 +43,5 @@ private:
 	int special_ability_cooldown;
 	int toughness;
 
-	void set(int = 10);
+	void set(int = 20);
 };
