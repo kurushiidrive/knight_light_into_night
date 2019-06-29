@@ -105,7 +105,19 @@ void Game::Run()
 	Type("\t0:\tWarrior\n\t1:\tRanger\n\t2:\tWizard\n\t");
 	std::cout << "$   ";
 	int tmp_p;
-	std::cin >> tmp_p; player.Reset(tmp_p);
+	std::cin >> tmp_p;
+	while (tmp_p != 0 && tmp_p != 1 && tmp_p != 2)
+	{
+		Type("I\'m sorry, but the program could not recognise your input.");
+		std::this_thread::sleep_for(std::chrono::seconds{ 2 });
+		Type(" Please retry.\n");
+		std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+
+		Type("\t0:\tWarrior\n\t1:\tRanger\n\t2:\tWizard\n\t");
+		std::cout << "$   ";
+		std::cin >> tmp_p;
+	}
+	player.Reset(tmp_p);
 	Type("Indeed, you are Sir " + player.Get_Name() + ", the ");
 	switch (player.Get_Prof())
 	{
@@ -135,12 +147,14 @@ void Game::Run()
 
 void Game::PrintOptions()
 {
-	std::cout << "What would you like to do:" << std::endl;
+	std::cout << "What would you like to do (" << player.Get_Action_Points() << " AP remaining):" << std::endl;
 	std::cout << "\t0:\tconcede" << std::endl;
-	std::cout << "\t1:\tNormal Ability (1 AP)" << std::endl;
-	std::cout << "\t2:\tAccel Guard (1 AP)" << std::endl;
-	std::cout << "\t3:\tAccel Strike (1 AP)" << std::endl;
+	std::cout << "\t1:\tNormal Ability (-1 AP)" << std::endl;
+	std::cout << "\t2:\tAccel Guard (-1 AP)" << std::endl;
+	std::cout << "\t3:\tAccel Strike (-1 AP)" << std::endl;
 	std::cout << "\t4:\tgame stats" << std::endl;
+	if (player.Get_Prof() == 1)
+		std::cout << "\t5:\tSwitch Weapons (-0 AP, requires minimum 1 AP remaining)" << std::endl;
 }
 
 void Game::GameLoop()
@@ -155,11 +169,13 @@ void Game::GameLoop()
 	while (!night.empty() && !conceded)
 	{
 		gameover = false; conceded = false;
+		if (turn_count == 1)
+		{
+			Type("You have entered, and before you stands an enemy, of the Night.\n");
+			std::this_thread::sleep_for(std::chrono::seconds{ 2 });
+		}
 		while (!gameover)
 		{
-			if (turn_count == 1)
-				Type("You have entered, and before you stands an enemy, of the Night.\n");
-			std::this_thread::sleep_for(std::chrono::seconds{ 2 });
 			if (turn_flag)
 			{
 				// just in case
@@ -208,7 +224,7 @@ void Game::GameLoop()
 
 					attack_data = player.Use_Normal_Ability(); it = attack_data.begin();
 					armour_class = night.front().Get_DEF() + 10;
-					Type("Your attack roll: " + std::to_string(attack_data[0] - player.Get_ATK() - player.Get_Atk_Bonus()) + "(+" + std::to_string(player.Get_ATK()) + ")\tAC: " + std::to_string(armour_class) + "\n");
+					Type("Your attack roll: " + std::to_string(attack_data[0] - player.Get_ATK() - player.Get_Atk_Bonus()) + "(+" + std::to_string(player.Get_ATK() + player.Get_Atk_Bonus()) + ")\tAC: " + std::to_string(armour_class) + "\n");
 					std::this_thread::sleep_for(std::chrono::seconds{ 2 });
 
 					// did the attack hit?
@@ -223,6 +239,7 @@ void Game::GameLoop()
 						}
 						if (attack_data[3])
 						{
+							std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
 							Type("FATAL!!!");
 							*(it + 2) *= 5;
 						}
@@ -230,7 +247,7 @@ void Game::GameLoop()
 							Type("\tHit!!");
 						std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
 
-						Type("\nDamage roll: " + std::to_string(attack_data[2] - player.Get_POW()) + "(+" + std::to_string(player.Get_POW()) + ") = " + std::to_string(attack_data[2]) + " damage\n");
+						Type("\nDamage roll: " + std::to_string(attack_data[2] - player.Get_POW() - player.Get_Pow_Bonus()) + "(+" + std::to_string(player.Get_POW() + player.Get_Pow_Bonus()) + ") = " + std::to_string(attack_data[2]) + " damage\n");
 						std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
 						Type("\tResist " + std::to_string(night.front().Get_RES()) + " --> " + std::to_string(attack_data[2] - night.front().Get_RES()) + " damage dealt.\n");
 
@@ -254,7 +271,7 @@ void Game::GameLoop()
 					{
 						Type("\tMiss.\n");
 						std::this_thread::sleep_for(std::chrono::milliseconds{ 800 });
-						Type("The enemy NIGHT now has " + std::to_string(night.front().Get_HP()) + " HP remaining.\n");
+						Type("The enemy NIGHT has " + std::to_string(night.front().Get_HP()) + " HP remaining.\n");
 						//k_DEF = K_DEF_ORIG;
 					}
 
@@ -277,7 +294,8 @@ void Game::GameLoop()
 
 						if (yorn == 'n' || yorn == 'N')
 						{
-							night.pop();
+							if (!night.empty())
+								night.pop();
 							Type("\nGame ");
 							std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
 							Type("Over.\n");
@@ -287,11 +305,12 @@ void Game::GameLoop()
 						{
 							Type("\nYou advance further into the Night.\n\n");
 							std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
-							night.front().Reset();
+							night.front().Reset(night.front().Get_Level()+1);
 							player.Reset_Action_Points();
 						}
 
 						gameover = true;
+						turn_count = 1;
 						break;
 					}
 					else if (player.Get_HP() <= 0) // later this should be another if statement and not an else-if
@@ -325,9 +344,11 @@ void Game::GameLoop()
 							Type("\nYou rise from the ground, determined to press on through the Night.\n\n");
 							std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
 							player.Reset(player.Get_Prof());
+							night.front().Reset_Action_Points();
 						}
 						
 						gameover = true;
+						turn_count = 1;
 						break;
 					}
 
@@ -345,7 +366,7 @@ void Game::GameLoop()
 					break;
 				case 2:
 					if (!player.Accel_Guard())
-						Type("Not enough action points.\n");
+						Type("Not enough action points or Accel Guard was already activated.\n");
 					else
 					{
 						Type("Sir " + player.Get_Name() + " has activated Accel Guard. Bonus Defense against next attack.\n");
@@ -364,7 +385,7 @@ void Game::GameLoop()
 					break;
 				case 3:
 					if (!player.Accel_Strike())
-						Type("Not enough action points.\n");
+						Type("Not enough action points or Accel Strike was already activated.\n");
 					else
 					{
 						Type("Sir " + player.Get_Name() + " has activated Accel Strike. Bonus Damage dealt on next attack.\n");
@@ -400,6 +421,33 @@ void Game::GameLoop()
 					std::this_thread::sleep_for(std::chrono::seconds{ 5 });
 
 					break;
+				case 5:
+					if (player.Get_Prof() != 1)
+					{
+						Type("I\'m sorry, but the program could not recognise your input.");
+						std::this_thread::sleep_for(std::chrono::seconds{ 2 });
+						Type(" Please reenter a number corresponding to the action you would like to take this turn.\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+						break;
+					}
+					
+					if (player.Switch())
+						Type("Sir " + player.Get_Name() + " has switched weapons. [check game stats for new weapon statistics]\n");
+					else
+						Type("Not enough action points.\n");
+
+					if (player.Get_Action_Points() <= 0)
+					{
+						turn_flag = false;
+						turn_count++;
+						player.Reset_Action_Points();
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
+						Type("End of Sir " + player.Get_Name() + "\'s turn.\n");
+					}
+
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+
+					break;
 				default:
 					Type("I\'m sorry, but the program could not recognise your input.");
 					std::this_thread::sleep_for(std::chrono::seconds{ 2 });
@@ -409,17 +457,152 @@ void Game::GameLoop()
 
 				std::cout << std::endl << std::endl << std::endl;
 			}
+
 			else
 			{
+				// just in case
+				std::vector<int> attack_data;
+				std::vector<int>::iterator it;
+				int armour_class;
+
 				Type("It is the enemy NIGHT\'s turn.\n");
 				std::this_thread::sleep_for(std::chrono::seconds{ 1 });
 				Type("The enemy NIGHT attacks Sir " + player.Get_Name() + "!\n");
 				Type("\tNight Raze -\n");
 
-				turn_count++;
-				turn_flag = true;
-				player.Set_Accel_Guard(false);
+				attack_data = night.front().Use_Normal_Ability(); it = attack_data.begin();
+				armour_class = player.Get_DEF() + player.Get_Def_Bonus() + 10;
+				Type("The enemy NIGHT\'s attack roll: " + std::to_string(attack_data[0] - night.front().Get_ATK()) + "(+" + std::to_string(night.front().Get_ATK()) + ")\tAC: " + std::to_string(armour_class) + "\n");
+				std::this_thread::sleep_for(std::chrono::seconds{ 2 });
 
+				// did it hit?
+				if (attack_data[0] - night.front().Get_ATK() != 1 && (attack_data[1] || attack_data[0] >= armour_class))
+				{
+					if (player.Get_Accel_Guard())
+					{
+						// accel guard is applied before critical damage adjustment
+						if (attack_data[1])
+							* (it + 2) /= 3;
+						*(it + 2) -= player.Get_RES() + player.Get_Level();
+						if (attack_data[1])
+							* (it + 2) *= 3;
+
+						Type("Accel Guard! Sir " + player.Get_Name() + " gets bonus resistance!\n");
+						player.Set_Accel_Guard(false);
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 700 });
+					}
+					if (attack_data[1])
+						Type("\tCritical Hit!!");
+					else
+						Type("\tHit!!");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
+
+					Type("\nDamage roll: " + std::to_string(attack_data[2] - night.front().Get_POW()) + "(+" + std::to_string(night.front().Get_POW()) + ") = " + std::to_string(attack_data[2]) + " damage\n");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
+					Type("\tResist " + std::to_string(player.Get_RES()) + " --> " + std::to_string(attack_data[2] - player.Get_RES()) + " damage dealt.\n");
+
+					player.Set_HP(player.Get_HP() - (attack_data[2] - player.Get_RES()));
+					if (attack_data[2] - player.Get_RES() < 0)
+						Type("Sir " + player.Get_Name() + " has just absorbed damage since their resistance was higher than the damage dealt!\n");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 800 });
+					Type("Sir " + player.Get_Name() + " now has " + std::to_string(player.Get_HP()) + " HP remaining.\n");
+					std::this_thread::sleep_for(std::chrono::seconds{ 1 });
+				}
+				else
+				{
+					Type("\tMiss.\n");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 800 });
+					Type("Sir " + player.Get_Name() + " has " + std::to_string(player.Get_HP()) + " HP remaining.\n");
+				}
+
+				// death conditions
+				if (night.front().Get_HP() <= 0)
+				{
+					Type("Sir " + player.Get_Name() + " victory! You have cleared the Night before you.\t(in " + std::to_string(turn_count) + " turns.)\n");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+					Type("\n\nWould you like to continue? [y or n]   >   ");
+					char yorn; std::cin >> yorn;
+					while (yorn != 'y' && yorn != 'Y' && yorn != 'n' && yorn != 'N')
+					{
+						Type("I\'m sorry, but the program could not recognise your input.");
+						std::this_thread::sleep_for(std::chrono::seconds{ 2 });
+						Type(" Please retry.\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+
+						Type("\n\nWould you like to continue? [y or n]   >   ");
+						std::cin >> yorn;
+					}
+
+					if (yorn == 'n' || yorn == 'N')
+					{
+						if (!night.empty())
+							night.pop();
+						Type("\nGame ");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
+						Type("Over.\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+					}
+					else if (yorn == 'y' || yorn == 'Y')
+					{
+						Type("\nYou advance further into the Night.\n\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+						night.front().Reset(night.front().Get_Level()+1);
+						player.Reset_Action_Points();
+					}
+
+					gameover = true;
+					turn_count = 1;
+					break;
+				}
+				else if (player.Get_HP() <= 0) // later this should be another if statement and not an else-if
+				{
+					Type("Sir " + player.Get_Name() + " defeat! The Night consumed you, preventing your advance.\t(in " + std::to_string(turn_count) + " turns.)\n");
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+					Type("\n\nWould you like to continue? [y or n]   >   ");
+					char yorn; std::cin >> yorn;
+					while (yorn != 'y' && yorn != 'Y' && yorn != 'n' && yorn != 'N')
+					{
+						Type("I\'m sorry, but the program could not recognise your input.");
+						std::this_thread::sleep_for(std::chrono::seconds{ 2 });
+						Type(" Please retry.\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+
+						Type("\n\nWould you like to continue? [y or n]   >   ");
+						std::cin >> yorn;
+					}
+
+					if (yorn == 'n' || yorn == 'N')
+					{
+						if (!night.empty())
+							night.pop();
+						Type("\nGame ");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
+						Type("Over.\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+					}
+					else if (yorn == 'y' || yorn == 'Y')
+					{
+						Type("\nYou rise from the ground, determined to press on through the Night.\n\n");
+						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
+						player.Reset(player.Get_Prof());
+						night.front().Reset_Action_Points();
+					}
+
+					gameover = true;
+					turn_count = 1;
+					break;
+				}
+
+				if (night.front().Get_Action_Points() <= 0)
+				{
+					turn_flag = true;
+					turn_count++;
+					night.front().Reset_Action_Points();
+					std::this_thread::sleep_for(std::chrono::milliseconds{ 1500 });
+					Type("End of enemy NIGHT\'s turn.\n");
+				}
+
+				std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
 				std::cout << std::endl << std::endl << std::endl;
 			}
 		}
@@ -464,7 +647,7 @@ std::ostream& Type(std::string str)
 	for (int i = 0; i != str.length()-1; i++)
 	{
 		std::cout << str[i];
-		std::this_thread::sleep_for(std::chrono::milliseconds{ 30 });
+		std::this_thread::sleep_for(std::chrono::milliseconds{ 25 });
 	}
 
 	return std::cout << str[str.length() - 1];
