@@ -1,4 +1,4 @@
-/* Opening Letter
+/* Story
  * The trees that conceived yesternight our Dear Fire from which
  * comes our Light (by which all in our land move, live, and
  * have breath--our most important resource) have abruptly been
@@ -28,8 +28,6 @@
 
  /* concepts:
   * main boss: Bane of Night (Arbane's evil twin xD)
-  * turn-based dungeon progression fights, using items and experience level tracking
-  * three classes (based on the short versions "three weapon categories")
   */
 
 
@@ -43,7 +41,7 @@
 
 /*
   // C++11
-#include <iostream>
+#include <iostream>		// std::cout
 #include <chrono>		// std::chrono
 #include <thread>		// Visual C++ can run the program using this header no problem; however, gcc (g++) will require a more tedious process to be able to use the thread header's capabilities.
 #include <string>		// std::string
@@ -51,6 +49,9 @@
 #include <functional>	// std::bind and std::function
 #include <random>		// std::uniform_int_distribution, std::mt19937, and std::random_device
 #include <vector>		// std::vector
+#include <cmath>		// std::ceil
+#include <queue>		// std::queue
+#include <windows.h>	// for clearning the screen in visual c++, this header is needed
 */
 
 #include "Game.h"
