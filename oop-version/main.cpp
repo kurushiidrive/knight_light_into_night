@@ -39,27 +39,27 @@
 
 
 
-/*
-  // C++11
-#include <iostream>		// std::cout
-#include <chrono>		// std::chrono
-#include <thread>		// Visual C++ can run the program using this header no problem; however, gcc (g++) will require a more tedious process to be able to use the thread header's capabilities.
-#include <string>		// std::string
-#include <future>		// std::promise and std::future
-#include <functional>	// std::bind and std::function
-#include <random>		// std::uniform_int_distribution, std::mt19937, and std::random_device
-#include <vector>		// std::vector
-#include <cmath>		// std::ceil
-#include <queue>		// std::queue
-#include <windows.h>	// for clearning the screen in visual c++, this header is needed
-*/
+  /*
+    // C++11
+  #include <iostream>		// std::cout
+  #include <chrono>		// std::chrono
+  #include <thread>		// Visual C++ can run the program using this header no problem; however, gcc (g++) will require a more tedious process to be able to use the thread header's capabilities.
+  #include <string>		// std::string
+  #include <future>		// std::promise and std::future
+  #include <functional>	// std::bind and std::function
+  #include <random>		// std::uniform_int_distribution, std::mt19937, and std::random_device
+  #include <vector>		// std::vector
+  #include <cmath>		// std::ceil
+  #include <queue>		// std::queue
+  #include <windows.h>	// for clearning the screen in visual c++, this header is needed
+  */
 
 #include "Game.h"
 
 int main()
 {
-	Game game;
-	game.Run();
+    Game game;
+    game.Run();
 
-	return 0;
+    return 0;
 }

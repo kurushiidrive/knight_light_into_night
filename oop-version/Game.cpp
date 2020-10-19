@@ -305,7 +305,7 @@ void Game::GameLoop()
 						{
 							Type("\nYou advance further into the Night.\n\n");
 							std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
-							night.front().Reset(night.front().Get_Level()+1);
+							night.front().Reset(night.front().Get_Level() + 1);
 							player.Reset_Action_Points();
 						}
 
@@ -332,7 +332,7 @@ void Game::GameLoop()
 
 						if (yorn == 'n' || yorn == 'N')
 						{
-							if(!night.empty())
+							if (!night.empty())
 								night.pop();
 							Type("\nGame ");
 							std::this_thread::sleep_for(std::chrono::milliseconds{ 500 });
@@ -346,7 +346,7 @@ void Game::GameLoop()
 							player.Reset(player.Get_Prof());
 							night.front().Reset_Action_Points();
 						}
-						
+
 						gameover = true;
 						turn_count = 1;
 						break;
@@ -430,7 +430,7 @@ void Game::GameLoop()
 						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
 						break;
 					}
-					
+
 					if (player.Switch())
 						Type("Sir " + player.Get_Name() + " has switched weapons. [check game stats for new weapon statistics]\n");
 					else
@@ -482,10 +482,10 @@ void Game::GameLoop()
 					{
 						// accel guard is applied before critical damage adjustment
 						if (attack_data[1])
-							* (it + 2) /= 3;
+							*(it + 2) /= 3;
 						*(it + 2) -= player.Get_RES() + player.Get_Level();
 						if (attack_data[1])
-							* (it + 2) *= 3;
+							*(it + 2) *= 3;
 
 						Type("Accel Guard! Sir " + player.Get_Name() + " gets bonus resistance!\n");
 						player.Set_Accel_Guard(false);
@@ -546,7 +546,7 @@ void Game::GameLoop()
 					{
 						Type("\nYou advance further into the Night.\n\n");
 						std::this_thread::sleep_for(std::chrono::milliseconds{ 2500 });
-						night.front().Reset(night.front().Get_Level()+1);
+						night.front().Reset(night.front().Get_Level() + 1);
 						player.Reset_Action_Points();
 					}
 
@@ -644,7 +644,7 @@ void Launch(std::future<void> future_obj)
 
 std::ostream& Type(std::string str)
 {
-	for (int i = 0; i != str.length()-1; i++)
+	for (int i = 0; i != str.length() - 1; i++)
 	{
 		std::cout << str[i];
 		std::this_thread::sleep_for(std::chrono::milliseconds{ 25 });

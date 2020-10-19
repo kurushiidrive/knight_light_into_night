@@ -5,7 +5,7 @@
 #endif
 
 Player::Player() :
-	level{ 20 }
+	level{ 1 }
 {
 	set(level);
 	initialised = true;
@@ -18,7 +18,7 @@ void Player::set(int level, profession p)
 	DEF = level + 8 + die.Reset(1, 6)(level);
 	POW = level + 12 + die(level);
 	RES = level + 20 + die.Reset(1, 2)(level);
-	HP = (int)std::ceil(48.1 + (1.29*level));
+	HP = (int)std::ceil(48.1 + (1.29 * level));
 
 	prof = p;
 
@@ -160,8 +160,8 @@ bool Player::Switch()
 	if (action_points < 1)
 		return false;
 
-//	std::size_t index = weapon.find(' ');
-	if (weapon == "bow daggers") 
+	//	std::size_t index = weapon.find(' ');
+	if (weapon == "bow daggers")
 	{
 		// make sure proper combat bonuses are applied
 		atk_bonus = ((int)std::ceil(3.0 * level));
@@ -175,7 +175,7 @@ bool Player::Switch()
 	else if (weapon == "daggers bow")
 	{
 		// make sure proper combat bonuses are applied
-		
+
 		atk_bonus = (int)std::ceil(3.4 * level);
 		def_bonus = 0;
 		pow_bonus = (int)std::ceil(2.8 * level);
@@ -260,10 +260,10 @@ std::vector<int> Player::Use_Normal_Ability()
 			damage_roll += die.Reset(1, 8)((int)std::ceil(level / 2.0));
 		break;
 	case WIZARD:
-		damage_roll += die.Reset(1, 12)((int)std::ceil(level*1.5));
+		damage_roll += die.Reset(1, 12)((int)std::ceil(level * 1.5));
 		break;
 	}
-	
+
 	bool fatal = Fatal(die.Reset(1, 50)());
 	bool ac_str = accel_strike;
 	int recoil = 0;

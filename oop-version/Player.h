@@ -10,11 +10,14 @@ public:
 	Player();
 	bool Crit(int roll); // determines if said roll is a crit, based on profession.
 	bool Fatal(int roll); // determines if said roll is a fatal, based on profession.
-	bool Switch ();	// applies only to ranger.
+	bool Switch();	// applies only to ranger.
 
 	bool Accel_Strike();
 	bool Accel_Guard();
 	void Set_Accel_Guard(bool);
+	void Set_Accel_Strike(bool);
+	bool Get_Accel_Strike();
+	bool Get_Accel_Guard();
 
 	std::vector<int> Use_Normal_Ability();
 

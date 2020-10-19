@@ -13,7 +13,7 @@ public:
 	void Set_POW(int);
 	int Get_RES();
 	void Set_RES(int);
-	
+
 	int Get_HP();
 	void Set_HP(int);
 

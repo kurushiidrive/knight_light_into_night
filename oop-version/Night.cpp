@@ -3,16 +3,16 @@
 
 Night::Night()
 {
-	set();
+	set(1);
 }
 
 void Night::set(int lvl)
 {
 	level = lvl;	// for debugging make it and PC's level |1|.
-	n_ATK = level + 8 + die.Reset(1, 2)(level/2+1);
-	n_DEF = level + 6 + die.Reset(1, 8)(level/2+1);
-	n_POW = level + 7 + die.Reset(1, 11)(level/2+1);
-	n_RES = level + 5 + die.Reset(1, 9)(level/2+1);
+	n_ATK = level + 8 + die.Reset(1, 2)(level / 2 + 1);
+	n_DEF = level + 6 + die.Reset(1, 8)(level / 2 + 1);
+	n_POW = level + 7 + die.Reset(1, 11)(level / 2 + 1);
+	n_RES = level + 5 + die.Reset(1, 9)(level / 2 + 1);
 	n_HP = (int)std::ceil(64.1 + (1.9 * level)) + die.Reset(1, 20)(level);
 
 	BASE_ACTION_POINTS = level / 10;
@@ -42,10 +42,10 @@ std::vector<int> Night::Use_Normal_Ability()
 	attack_roll += n_ATK;
 
 	// Night aren't as powerful as the Player Character Knights, but they have much more power in their critical strikes.
-	int damage_roll = die.Reset(1, 10)((int)std::ceil(level / 3.0)+1) + n_POW;
+	int damage_roll = die.Reset(1, 10)((int)std::ceil(level / 3.0) + 1) + n_POW;
 	if (critical)
 		damage_roll *= 3;
-	
+
 	ret.push_back(attack_roll);
 	ret.push_back(critical);
 	ret.push_back(damage_roll);
